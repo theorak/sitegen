@@ -5,6 +5,7 @@ from textnode import TextNode, TextType
 
 class TestTextNode(unittest.TestCase):
     def test_eq(self):
+        print("TextNode Test: test_eq")
         node = TextNode("This is a text node", TextType.BOLD)
         node2 = TextNode("This is a text node", TextType.BOLD)
         self.assertEqual(node, node2)
@@ -19,11 +20,13 @@ class TestTextNode(unittest.TestCase):
 
 
     def test_not_eq(self):
+        print("TextNode Test: test_not_eq")
         node = TextNode("This is a text node", TextType.BOLD)
         node2 = TextNode("This is a text node", TextType.ITALIC)
         self.assertNotEqual(node, node2)
 
     def test_url_none(self):
+        print("TextNode Test: test_url_none")
         node = TextNode("This is a text node", TextType.LINKS)
         self.assertIsNone(node.url)
 
