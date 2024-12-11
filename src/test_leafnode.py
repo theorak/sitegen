@@ -11,7 +11,7 @@ class TestHTMLNode(unittest.TestCase):
     def test_init_no_value(self):
         print("LeafNode Test: test_init_no_value")
         with self.assertRaises(ValueError):
-            leaf_node = LeafNode("p")
+            leaf_node = LeafNode("p", None)
 
 
     def test_to_html(self):
