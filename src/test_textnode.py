@@ -27,10 +27,10 @@ class TestTextNode(unittest.TestCase):
 
     def test_url_none(self):
         print("TextNode Test: test_url_none")
-        node = TextNode("This is a text node", TextType.LINKS)
+        node = TextNode("This is a text node", TextType.LINK)
         self.assertIsNone(node.url)
 
-        node2 = TextNode("This is a text node", TextType.IMAGES)
+        node2 = TextNode("This is a text node", TextType.IMAGE)
         self.assertIsNone(node2.url)
 
 
