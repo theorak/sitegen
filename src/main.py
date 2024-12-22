@@ -37,7 +37,7 @@ def split_nodes_delimiter(old_nodes: list, delimiter: str, text_type: TextType):
     new_nodes = []
     for node in old_nodes:
         if node.text_type != TextType.TEXT: # passthrough non-text nodes
-            new_nodes.extend[node]
+            new_nodes.extend([node])
         else:
             parts = node.text.split(delimiter)
             if len(parts) == 3:
@@ -46,8 +46,10 @@ def split_nodes_delimiter(old_nodes: list, delimiter: str, text_type: TextType):
                     TextNode(parts[1], text_type),
                     TextNode(parts[2], TextType.TEXT)
                 ])
+            elif len(parts) > 1:
+                raise Exception(f"Text Node does not properly terminate delimiters, should have two occurances of '{delimiter}'")
             else:
-                raise Exception(f"Text Node does not properly terminate delimiters, should have two occurances of '{delimiter}'")        
+                new_nodes.extend([node])
     return new_nodes
 
 # Markdown parser for images
@@ -62,7 +64,7 @@ def split_nodes_image(old_nodes: list):
     new_nodes = []
     for node in old_nodes:
         if node.text_type != TextType.TEXT: # passthrough non-text nodes
-            new_nodes.extend[node]
+            new_nodes.extend([node])
         else:
             matches = extract_markdown_images(node.text)  # list of tupels
             if len(matches) > 0:
@@ -71,23 +73,29 @@ def split_nodes_image(old_nodes: list):
                     image_alt = match[0]
                     image_link = match[1]
                     parts = text.split(f"![{image_alt}]({image_link})", 1) # split current position in text only once into image and rest
+                    text = parts[1]
                     if parts[0] != "":
-                        text = parts[1]
                         new_nodes.extend([
                             TextNode(parts[0], TextType.TEXT),
-                            TextNode(image_alt, TextType.IMAGE, image_link)
                         ])
-                    else:
-                        new_nodes.extend([
-                            TextNode(image_alt, TextType.IMAGE, image_link)
-                        ])
+                        
+                    new_nodes.extend([
+                        TextNode(image_alt, TextType.IMAGE, image_link),
+                    ])
+
+                if text != "":
+                    new_nodes.extend([
+                        TextNode(text, TextType.TEXT)
+                    ])
+            else:
+                new_nodes.extend([node])
     return new_nodes
 
 def split_nodes_link(old_nodes: list):
     new_nodes = []
     for node in old_nodes:
         if node.text_type != TextType.TEXT: # passthrough non-text nodes
-            new_nodes.extend[node]
+            new_nodes.extend([node])
         else:
             matches = extract_markdown_links(node.text)  # list of tupels
             if len(matches) > 0:
@@ -96,16 +104,33 @@ def split_nodes_link(old_nodes: list):
                     link_text = match[0]
                     url = match[1]
                     parts = text.split(f"[{link_text}]({url})", 1) # split current position in text only once into image and rest
+                    text = parts[1]   
                     if parts[0] != "":
-                        text = parts[1]
                         new_nodes.extend([
-                            TextNode(parts[0], TextType.TEXT),
-                            TextNode(link_text, TextType.LINK, url)
+                            TextNode(parts[0], TextType.TEXT)
                         ])
-                    else:
-                        new_nodes.extend([
-                            TextNode(link_text, TextType.LINK, url)
-                        ])
+
+                    new_nodes.extend([
+                        TextNode(link_text, TextType.LINK, url)
+                    ])
+
+                if text != "":
+                    new_nodes.extend([
+                        TextNode(text, TextType.TEXT)
+                    ])
+            else:
+                new_nodes.extend([node])
     return new_nodes
+
+def text_to_textnodes(text):
+    types_delimiters = TextNode.get_text_types_delimiters()
+    nodes = [TextNode(text, TextType.TEXT)]
+    for text_type, delimiter in types_delimiters.items():
+        nodes = split_nodes_delimiter(nodes, delimiter, text_type)
+
+    nodes = split_nodes_image(nodes)
+    nodes = split_nodes_link(nodes)
+
+    return nodes
 
 main()

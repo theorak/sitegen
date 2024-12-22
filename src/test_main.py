@@ -50,13 +50,13 @@ class TestTextNode(unittest.TestCase):
         )
         new_nodes = split_nodes_image([node])
         self.assertEqual(
-            new_nodes,
             [
                 TextNode("This is text with a ", TextType.TEXT),
                 TextNode("rick roll", TextType.IMAGE, "https://i.imgur.com/aKaOqIh.gif"),
                 TextNode(" and ", TextType.TEXT),
                 TextNode("obi wan", TextType.IMAGE, "https://i.imgur.com/fJRm4Vk.jpeg")
-            ]
+            ],
+            new_nodes
         )
 
     def test_split_nodes_link(self):
@@ -84,11 +84,29 @@ class TestTextNode(unittest.TestCase):
         )
         new_nodes = split_nodes_image([node])
         self.assertEqual(
-            new_nodes,
             [
                 TextNode("edge case", TextType.IMAGE, "https://i.imgur.com/aKaOqIh.gif"),
-            ]
+            ],
+            new_nodes
         )
+
+    def test_text_to_textnodes(self):
+        print("Main Test: test_text_to_textnodes")
+        text = "This is **text** with an *italic* word and a `code block` and an ![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg) and a [link](https://boot.dev)"
+        nodes = text_to_textnodes(text)
+        self.assertEqual([
+            TextNode("This is ", TextType.TEXT),
+            TextNode("text", TextType.BOLD),
+            TextNode(" with an ", TextType.TEXT),
+            TextNode("italic", TextType.ITALIC),
+            TextNode(" word and a ", TextType.TEXT),
+            TextNode("code block", TextType.CODE),
+            TextNode(" and an ", TextType.TEXT),
+            TextNode("obi wan image", TextType.IMAGE, "https://i.imgur.com/fJRm4Vk.jpeg"),
+            TextNode(" and a ", TextType.TEXT),
+            TextNode("link", TextType.LINK, "https://boot.dev"),
+        ], nodes)
+
 
 if __name__ == "__main__":
     unittest.main()
