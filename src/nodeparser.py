@@ -1,8 +1,17 @@
+from enum import Enum
 from textnode import TextNode, TextType
 from leafnode import LeafNode
 import re
 
-class Nodeparser():   
+class BlockType(Enum):
+    PARAGRAPH = "paragraph"
+    HEADING = "heading"
+    CODE = "code"
+    QUOTE = "quote"
+    UNORDERED_LIST = "unordered list"
+    ORDERED_LIST = "ordered list"
+
+class Nodeparser():
     def __init__(self):
         pass
 
@@ -123,7 +132,7 @@ class Nodeparser():
         return new_nodes
 
     # Uses above functions to split Text into nodes
-    def text_to_textnodes(self, text):
+    def text_to_textnodes(self, text: str):
         types_delimiters = TextNode.get_text_types_delimiters()
         nodes = [TextNode(text, TextType.TEXT)]
         for text_type, delimiter in types_delimiters.items():
@@ -133,3 +142,27 @@ class Nodeparser():
         nodes = self.split_nodes_link(nodes)
 
         return nodes
+    
+    def markdown_to_blocks(self, markdown: str):
+        markdown = markdown.strip()
+        lines = markdown.split('\n\n')
+        lines = list(filter(lambda x : x.strip(), lines))
+        lines = list(filter(lambda x : x is not None, lines))
+        return lines
+    
+    def block_to_block_type(self, markdown: str):
+        first = markdown[0]
+        second = markdown[1:2]
+        three = markdown[:3]
+        if first == "#":
+            return BlockType.HEADING
+        elif first == ">":
+            return BlockType.QUOTE
+        elif three == "```":
+            return BlockType.CODE
+        elif first == "*" or first == "-":
+            return BlockType.UNORDERED_LIST
+        elif first.isnumeric() and second == ".":
+            return BlockType.ORDERED_LIST
+        else:
+            return BlockType.PARAGRAPH

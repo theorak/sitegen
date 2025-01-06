@@ -2,7 +2,7 @@ import unittest
 
 from textnode import TextNode,TextType
 from leafnode import LeafNode
-from nodeparser import Nodeparser
+from nodeparser import Nodeparser, BlockType
 
 class TestNodeparser(unittest.TestCase):
     def test_text_node_to_html_node(self):
@@ -13,19 +13,19 @@ class TestNodeparser(unittest.TestCase):
     def test_link_node_to_html_node(self):
         print("Nodeparser Test: test_link_node_to_html_node")
         text_node = TextNode("Link", TextType.LINK, "https://www.google.com")
-        self.assertEqual(Nodeparser().text_node_to_html_node(text_node).to_html(), '<a href="https://www.google.com">Link</a>')
+        self.assertEqual('<a href="https://www.google.com">Link</a>', Nodeparser().text_node_to_html_node(text_node).to_html())
 
     def test_split_nodes_delimiter(self):
         print("Nodeparser Test: test_split_nodes_delimiter")
         node = TextNode("This is text with a `code block` word", TextType.TEXT)
         new_nodes = Nodeparser().split_nodes_delimiter([node], "`", TextType.CODE)
         self.assertEqual(
-            new_nodes,
             [
                 TextNode("This is text with a ", TextType.TEXT),
                 TextNode("code block", TextType.CODE),
                 TextNode(" word", TextType.TEXT),
-            ]
+            ],
+            new_nodes
         )
 
     def test_split_nodes_delimiter_error(self):
@@ -69,13 +69,13 @@ class TestNodeparser(unittest.TestCase):
         )
         new_nodes = Nodeparser().split_nodes_link([node])
         self.assertEqual(
-            new_nodes,
             [
                 TextNode("This is text with a link ", TextType.TEXT),
                 TextNode("to boot dev", TextType.LINK, "https://www.boot.dev"),
                 TextNode(" and ", TextType.TEXT),
                 TextNode("to youtube", TextType.LINK, "https://www.youtube.com/@bootdotdev")
-            ]
+            ],
+            new_nodes
         )
 
     def test_split_nodes_image_edge(self):
@@ -109,6 +109,37 @@ class TestNodeparser(unittest.TestCase):
             TextNode("link", TextType.LINK, "https://boot.dev"),
         ], nodes)
 
+    def test_markdown_to_blocks(self):
+        text = """
+This is **bolded** paragraph
+
+This is another paragraph with *italic* text and `code` here
+This is the same paragraph on a new line
+
+* This is a list
+* with items
+"""
+        lines = Nodeparser().markdown_to_blocks(text)
+        self.maxDiff = None
+        self.assertEqual([
+                "This is **bolded** paragraph",
+                "This is another paragraph with *italic* text and `code` here\nThis is the same paragraph on a new line",
+                "* This is a list\n* with items",
+            ], lines)
+
+    def test_block_to_block_type(self):
+        paragraph = "This is just a paragraph"
+        heading = "## This is an H2"
+        code = "```This is a code block```"
+        quote = ">This is a Quote<"
+        unordered_list = "* This starts a List"
+        ordered_list = "1. This is the first item in a list"
+        self.assertEqual(BlockType.PARAGRAPH, Nodeparser().block_to_block_type(paragraph))
+        self.assertEqual(BlockType.HEADING, Nodeparser().block_to_block_type(heading))
+        self.assertEqual(BlockType.CODE, Nodeparser().block_to_block_type(code))
+        self.assertEqual(BlockType.QUOTE, Nodeparser().block_to_block_type(quote))
+        self.assertEqual(BlockType.UNORDERED_LIST, Nodeparser().block_to_block_type(unordered_list))
+        self.assertEqual(BlockType.ORDERED_LIST, Nodeparser().block_to_block_type(ordered_list))
 
 if __name__ == "__main__":
     unittest.main()
