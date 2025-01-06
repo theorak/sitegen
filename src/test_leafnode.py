@@ -2,7 +2,7 @@ import unittest
 
 from leafnode import LeafNode
 
-class TestHTMLNode(unittest.TestCase):
+class TestLeafNode(unittest.TestCase):
     def test_init_leafnode(self):
         print("LeafNode Test: test_init_leafnode")
         leaf_node = LeafNode("p", "This is a paragraph of text.")
