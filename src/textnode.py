@@ -4,6 +4,7 @@ class TextType(Enum):
     TEXT = "text"
     BOLD = "bold"
     ITALIC = "italic"
+    ITALIC2 = "italic2"
     CODE = "code"
     LINK = "link"
     IMAGE = "image"
@@ -26,5 +27,6 @@ class TextNode():
         return {
             TextType.BOLD: "**",
             TextType.ITALIC: "*",
+            TextType.ITALIC2: "_",
             TextType.CODE: "`"
         }
