@@ -9,6 +9,13 @@ class TextType(Enum):
     LINK = "link"
     IMAGE = "image"
 
+class TextTypeDelimiters(Enum):    
+    BOLD = "**",
+    ITALIC = "*",
+    ITALIC2 = "_",
+    CODE = "`"
+    PATTERN = r"(\*\*.*?\*\*|\*.*?\*|_.*?_|`.*?`)"
+
 class TextNode():    
     def __init__(self, text: str, text_type: TextType, url:str = None):
         self.text = text
@@ -22,11 +29,3 @@ class TextNode():
         
     def __repr__(self):
         return f"TextNode({self.text}, {self.text_type.value}, {self.url})"
-    
-    def get_text_types_delimiters():
-        return {
-            TextType.BOLD: "**",
-            TextType.ITALIC: "*",
-            TextType.ITALIC2: "_",
-            TextType.CODE: "`"
-        }

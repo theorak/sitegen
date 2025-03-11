@@ -1,5 +1,5 @@
 from enum import Enum
-from textnode import TextNode, TextType
+from textnode import TextNode, TextType, TextTypeDelimiters
 from leafnode import LeafNode
 from parentnode import ParentNode
 from htmlnode import HTMLNode
@@ -44,23 +44,25 @@ class Nodeparser():
         return html_node
 
     # Splits nodes by delimiter into new nodes of the desired type
-    def split_nodes_delimiter(self, old_nodes: list, delimiter: str, text_type: TextType):
+    def split_nodes_delimiter(self, old_nodes: list):
         new_nodes = []
         for node in old_nodes:
             if node.text_type != TextType.TEXT: # passthrough non-text nodes
-                new_nodes.extend([node])
+                new_nodes.append(node)
             else:
-                parts = node.text.split(delimiter)
-                if len(parts) == 3:
-                    new_nodes.extend([
-                        TextNode(parts[0], TextType.TEXT),
-                        TextNode(parts[1], text_type),
-                        TextNode(parts[2], TextType.TEXT)
-                    ])
-                elif len(parts) > 1:
-                    raise Exception(f"Text Node does not properly terminate delimiters, should have two occurances of '{delimiter}'")
-                else:
-                    new_nodes.extend([node])
+                parts = re.split(TextTypeDelimiters.PATTERN.value, node.text) # split text into occourences, then sort into typed nodes and plain text
+                for part in parts:
+                    if part.startswith(TextTypeDelimiters.BOLD.value) and part.endswith(TextTypeDelimiters.BOLD.value):
+                        new_nodes.append(TextNode(part[2:-2], TextType.BOLD))
+                    elif (part.startswith(TextTypeDelimiters.ITALIC.value) and part.endswith(TextTypeDelimiters.ITALIC.value)):
+                        new_nodes.append(TextNode(part[1:-1], TextType.ITALIC))
+                    elif (part.startswith(TextTypeDelimiters.ITALIC2.value) and part.endswith(TextTypeDelimiters.ITALIC2.value)):
+                        new_nodes.append(TextNode(part[1:-1], TextType.ITALIC))
+                    elif part.startswith(TextTypeDelimiters.CODE.value) and part.endswith(TextTypeDelimiters.CODE.value):
+                        new_nodes.append(TextNode(part[1:-1], TextType.CODE))
+                    else:
+                       new_nodes.append(TextNode(part, TextType.TEXT))
+                
         return new_nodes
 
     # Markdown parser for images
@@ -137,11 +139,9 @@ class Nodeparser():
 
     # Uses above functions to split Text into nodes
     def text_to_textnodes(self, text: str):
-        types_delimiters = TextNode.get_text_types_delimiters()
         nodes = [TextNode(text, TextType.TEXT)]
-        for text_type, delimiter in types_delimiters.items():
-            nodes = self.split_nodes_delimiter(nodes, delimiter, text_type)
 
+        nodes = self.split_nodes_delimiter(nodes)
         nodes = self.split_nodes_image(nodes)
         nodes = self.split_nodes_link(nodes)
 
@@ -155,7 +155,7 @@ class Nodeparser():
         lines = list(filter(lambda x : x is not None, lines))
         return lines
     
-    # return block type for each markdown syntax
+    # return block type for each markdown syntax, checking first 3 characters
     def block_to_block_type(self, markdown: str):
         first = markdown[0]
         second = markdown[1:2]
@@ -166,7 +166,7 @@ class Nodeparser():
             return BlockType.QUOTE
         elif three == "```":
             return BlockType.CODE
-        elif first == "*" or first == "-":
+        elif (first == "*" or first == "-") and second == " ":
             return BlockType.UNORDERED_LIST
         elif first.isnumeric() and second == ".":
             return BlockType.ORDERED_LIST
