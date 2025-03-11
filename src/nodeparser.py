@@ -173,8 +173,8 @@ class Nodeparser():
         else:
             return BlockType.PARAGRAPH
 
-    # Finally turns markdown into html nodes, including nexted children            
-    def markdown_to_html_node(self, markdown: str):
+    # Finally turns markdown into html nodes, including nested children            
+    def markdown_to_html_node(self, markdown: str) -> ParentNode:
         blocks = self.markdown_to_blocks(markdown)
         children = []
         for block in blocks:
@@ -191,9 +191,9 @@ class Nodeparser():
             return self.heading_to_html_node(block)
         if block_type == BlockType.CODE:
             return self.code_to_html_node(block)
-        if block_type == BlockType.OLIST:
+        if block_type == BlockType.ORDERED_LIST:
             return self.olist_to_html_node(block)
-        if block_type == BlockType.ULIST:
+        if block_type == BlockType.UNORDERED_LIST:
             return self.ulist_to_html_node(block)
         if block_type == BlockType.QUOTE:
             return self.quote_to_html_node(block)
