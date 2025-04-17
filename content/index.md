@@ -1,5 +1,10 @@
 # Tolkien Fan Club
 
+# AWS
+
+- [Notes Kappes](/aws/notes_kappes.html)
+- [Notes Skill Builder](/aws/notes_skillbuilder.html)
+
 ![JRR Tolkien sitting](/images/tolkien.png)
 
 Here's the deal, **I like Tolkien**.
